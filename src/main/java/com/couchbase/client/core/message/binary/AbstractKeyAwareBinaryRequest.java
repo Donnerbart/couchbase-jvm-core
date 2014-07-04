@@ -21,24 +21,27 @@
  */
 package com.couchbase.client.core.message.binary;
 
-import com.couchbase.client.core.message.CouchbaseRequest;
-import com.couchbase.client.core.message.document.CoreDocument;
-
 /**
- * Represents a response to a {@link GetRequest}.
- *
- * @author Michael Nitschinger
  * @author David Sondermann
- * @since 1.0
+ * @since 2.0
  */
-public class GetResponse extends AbstractCoreDocumentBinaryResponse {
+public abstract class AbstractKeyAwareBinaryRequest extends AbstractBinaryRequest {
 
-    public GetResponse(final CoreDocument document, final String bucket, final CouchbaseRequest request) {
-        super(document, bucket, request);
+    /**
+     * Creates a new {@link com.couchbase.client.core.message.binary.AbstractBinaryRequest}.
+     *
+     * @param bucket   the bucket of the document.
+     * @param password the optional password of the bucket.
+     */
+    protected AbstractKeyAwareBinaryRequest(final String bucket, final String password) {
+        super(bucket, password);
     }
 
-    @Override
-    public String toString() {
-        return toStringInternal("GetResponse");
-    }
+    /**
+     * The key of the document.
+     *
+     * @return the key of the document, if set.
+     */
+    public abstract String key();
+
 }

@@ -1,15 +1,17 @@
 package com.couchbase.client.core.message.binary;
 
-public class RemoveRequest extends AbstractBinaryRequest {
+public class RemoveRequest extends AbstractKeyAwareBinaryRequest {
 
+    private final String key;
     private final long cas;
 
-    public RemoveRequest(String key, String bucket) {
+    public RemoveRequest(final String key, final String bucket) {
         this(key, 0, bucket);
     }
 
-    public RemoveRequest(String key, long cas, String bucket) {
-        super(key, bucket, null);
+    public RemoveRequest(final String key, final long cas, final String bucket) {
+        super(bucket, null);
+        this.key = key;
         this.cas = cas;
     }
 
@@ -20,6 +22,11 @@ public class RemoveRequest extends AbstractBinaryRequest {
      */
     public long cas() {
         return cas;
+    }
+
+    @Override
+    public String key() {
+        return key;
     }
 
 }

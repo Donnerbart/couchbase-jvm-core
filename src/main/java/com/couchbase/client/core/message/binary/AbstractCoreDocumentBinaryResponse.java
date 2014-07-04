@@ -21,24 +21,41 @@
  */
 package com.couchbase.client.core.message.binary;
 
+import com.couchbase.client.core.message.AbstractCouchbaseResponse;
 import com.couchbase.client.core.message.CouchbaseRequest;
 import com.couchbase.client.core.message.document.CoreDocument;
+import io.netty.util.CharsetUtil;
 
 /**
- * Represents a response to a {@link GetRequest}.
+ * Represents a response to a {@link com.couchbase.client.core.message.binary.AbstractCoreDocumentBinaryRequest}.
  *
- * @author Michael Nitschinger
  * @author David Sondermann
- * @since 1.0
+ * @since 2.0
  */
-public class GetResponse extends AbstractCoreDocumentBinaryResponse {
+public abstract class AbstractCoreDocumentBinaryResponse extends AbstractCouchbaseResponse implements BinaryResponse {
 
-    public GetResponse(final CoreDocument document, final String bucket, final CouchbaseRequest request) {
-        super(document, bucket, request);
+    private final CoreDocument document;
+    private final String bucket;
+
+    public AbstractCoreDocumentBinaryResponse(final CoreDocument document, final String bucket, final CouchbaseRequest request) {
+        super(document.status(), request);
+        this.document = document;
+        this.bucket = bucket;
     }
 
     @Override
-    public String toString() {
-        return toStringInternal("GetResponse");
+    public CoreDocument document() {
+        return document;
+    }
+
+    @Override
+    public String bucket() {
+        return bucket;
+    }
+
+    protected String toStringInternal(final String className) {
+        return className + '{' + "bucket='" + bucket() + '\'' + ", status=" + status() + ", cas=" + document.cas()
+                + ", flags=" + document.flags() + ", request=" + request()
+                + ", content=" + document.content().toString(CharsetUtil.UTF_8) + '}';
     }
 }

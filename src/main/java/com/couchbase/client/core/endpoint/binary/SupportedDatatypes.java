@@ -22,7 +22,7 @@
 package com.couchbase.client.core.endpoint.binary;
 
 /**
- * Contains the supported server datatypes.
+ * Contains the supported server data types.
  *
  * @author Michael Nitschinger
  * @since 1.0

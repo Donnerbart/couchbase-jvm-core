@@ -75,42 +75,42 @@ public class QueryCodec extends MessageToMessageCodec<FullHttpResponse, QueryReq
 
     @Override
     protected void encode(final ChannelHandlerContext ctx, final QueryRequest msg, final List<Object> out)
-        throws Exception {
-        HttpRequest request;
+            throws Exception {
         if (msg instanceof GenericQueryRequest) {
-            request = handleGenericQueryRequest(ctx, (GenericQueryRequest) msg);
+            out.add(handleGenericQueryRequest(ctx, (GenericQueryRequest) msg));
         } else {
-            throw new IllegalArgumentException("Unknown Message to encode: " + msg);
+            throw new IllegalArgumentException("Unknown message to encode: " + msg);
         }
-        out.add(request);
+
         queue.offer(msg.getClass());
     }
 
-    private HttpRequest handleGenericQueryRequest(ChannelHandlerContext ctx, GenericQueryRequest msg) {
-        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/query");
-        ByteBuf query = Unpooled.copiedBuffer(msg.query(), CharsetUtil.UTF_8);
+    private HttpRequest handleGenericQueryRequest(final ChannelHandlerContext ctx, final GenericQueryRequest msg) {
+        final FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/query");
+        final ByteBuf query = Unpooled.copiedBuffer(msg.query(), CharsetUtil.UTF_8);
         request.headers().add(HttpHeaders.Names.CONTENT_LENGTH, query.readableBytes());
         request.content().writeBytes(query);
         query.release();
+
         return request;
     }
 
     @Override
     protected void decode(final ChannelHandlerContext ctx, final FullHttpResponse msg, final List<Object> out)
-        throws Exception {
-        Class<?> request = queue.poll();
+            throws Exception {
+        final Class<?> request = queue.poll();
         if (request.equals(GenericQueryRequest.class)) {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readValue(msg.content().toString(CharsetUtil.UTF_8), JsonNode.class);
+            final ObjectMapper mapper = new ObjectMapper();
+            final JsonNode root = mapper.readValue(msg.content().toString(CharsetUtil.UTF_8), JsonNode.class);
             if (root.has("resultset")) {
-                for(JsonNode result : root.path("resultset")) {
+                for (final JsonNode result : root.path("resultset")) {
                     out.add(new GenericQueryResponse(result.toString(), ResponseStatus.CHUNKED, null));
                 }
                 out.add(new GenericQueryResponse(null, ResponseStatus.SUCCESS, null)); // todo: fixme
             } else if (root.has("error")) {
                 out.add(new GenericQueryResponse(root.get("error").toString(), ResponseStatus.FAILURE, null));
             } else {
-                throw new IllegalStateException("Dont know how to deal with that response.");
+                throw new IllegalStateException("Don't know how to deal with that response.");
             }
         }
     }

@@ -21,24 +21,51 @@
  */
 package com.couchbase.client.core.message.binary;
 
-import com.couchbase.client.core.message.CouchbaseRequest;
 import com.couchbase.client.core.message.document.CoreDocument;
 
 /**
- * Represents a response to a {@link GetRequest}.
+ * Insert a document.
  *
- * @author Michael Nitschinger
  * @author David Sondermann
- * @since 1.0
+ * @since 2.0
  */
-public class GetResponse extends AbstractCoreDocumentBinaryResponse {
+public abstract class AbstractCoreDocumentBinaryRequest extends AbstractKeyAwareBinaryRequest {
 
-    public GetResponse(final CoreDocument document, final String bucket, final CouchbaseRequest request) {
-        super(document, bucket, request);
+    /**
+     * The document to insert.
+     */
+    private final CoreDocument document;
+
+    /**
+     * Creates a new {@link AbstractCoreDocumentBinaryRequest}.
+     *
+     * @param document the document.
+     * @param bucket   the name of the bucket.
+     */
+    public AbstractCoreDocumentBinaryRequest(final CoreDocument document, final String bucket) {
+        super(bucket, null);
+        this.document = document;
+    }
+
+    /**
+     * Returns the document of this request.
+     *
+     * @return the document.
+     */
+    public CoreDocument document() {
+        return document;
+    }
+
+    @Override
+    public String key() {
+        return document.id();
     }
 
     @Override
     public String toString() {
-        return toStringInternal("GetResponse");
+        return "AbstractCoreDocumentBinaryRequest{" +
+                "document=" + document +
+                "bucket=" + bucket() +
+                '}';
     }
 }
